@@ -9,11 +9,25 @@ import (
 )
 
 func main() {
+	userIP, err := getUserIP()
+	if err != nil {
+		fmt.Println("Error getting user IP:", err)
+		return
+	}
+
+	defaultStartIP := getNetworkStartIP(userIP)
 	var startIP, endIP string
-	fmt.Print("Enter the starting IP address (e.g., 192.168.1.1): ")
-	fmt.Scan(&startIP)
+	fmt.Printf("User IP: %s\n", userIP)
+	fmt.Printf("Default Starting IP: %s\n", defaultStartIP)
+	fmt.Print("Enter the starting IP address (or press Enter to use default): ")
+	fmt.Scanln(&startIP)
+
+	if startIP == "" {
+		startIP = defaultStartIP
+	}
+
 	fmt.Print("Enter the ending IP address (e.g., 192.168.1.254): ")
-	fmt.Scan(&endIP)
+	fmt.Scanln(&endIP)
 
 	startIP = strings.TrimSpace(startIP)
 	endIP = strings.TrimSpace(endIP)
@@ -37,6 +51,26 @@ func main() {
 	}
 
 	time.Sleep(5 * time.Second)
+}
+
+func getUserIP() (string, error) {
+	addrs, err := net.InterfaceAddrs()
+	if err != nil {
+		return "", err
+	}
+
+	for _, addr := range addrs {
+		if ipNet, ok := addr.(*net.IPNet); ok && !ipNet.IP.IsLoopback() && ipNet.IP.To4() != nil {
+			return ipNet.IP.String(), nil
+		}
+	}
+	return "", fmt.Errorf("no valid IP address found")
+}
+
+func getNetworkStartIP(userIP string) string {
+	ipParts := strings.Split(userIP, ".")
+	ipParts[3] = "1"
+	return strings.Join(ipParts, ".")
 }
 
 func ipToInt(ip net.IP) uint32 {
