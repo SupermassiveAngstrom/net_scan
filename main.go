@@ -8,6 +8,11 @@ import (
 	"time"
 )
 
+const (
+	green = "\033[32m"
+	reset = "\033[0m"
+)
+
 func main() {
 	userIP, err := getUserIP()
 	if err != nil {
@@ -92,9 +97,9 @@ func pingAndResolveIP(ipAddr net.IP) {
 	if err == nil {
 		names, err := net.LookupAddr(ipAddr.String())
 		if err == nil && len(names) > 0 {
-			fmt.Printf("%s - %s\n", ipAddr.String(), strings.TrimSuffix(names[0], "."))
+			fmt.Printf("%s%s%s - %s\n", green, ipAddr.String(), reset, strings.TrimSuffix(names[0], "."))
 		} else {
-			fmt.Printf("%s - Unknown\n", ipAddr.String())
+			fmt.Printf("%s%s%s - Unknown\n", green, ipAddr.String(), reset)
 		}
 	}
 }
