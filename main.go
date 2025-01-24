@@ -47,7 +47,7 @@ func main() {
 
 	for ip := start; ip <= end; ip++ {
 		ipAddr := intToIP(ip)
-		go pingIP(ipAddr)
+		go pingAndResolveIP(ipAddr)
 	}
 
 	time.Sleep(5 * time.Second)
@@ -86,12 +86,20 @@ func intToIP(ipInt uint32) string {
 	return fmt.Sprintf("%d.%d.%d.%d", byte(ipInt>>24), byte(ipInt>>16&0xFF), byte(ipInt>>8&0xFF), byte(ipInt&0xFF))
 }
 
-// pingIP pings the given IP address and prints if the IP is up
-func pingIP(ip string) {
+// pingAndResolveIP pings the given IP address and prints if the IP is up along with its hostname
+func pingAndResolveIP(ip string) {
 	cmd := exec.Command("ping", "-c", "1", "-W", "1", ip) // Ping the IP with a timeout of 1 second
 
 	err := cmd.Run()
 	if err == nil {
 		fmt.Printf("IP %s is up\n", ip) // Print if the IP is reachable
+
+		// Resolve the hostname
+		names, err := net.LookupAddr(ip)
+		if err == nil && len(names) > 0 {
+			fmt.Printf("Hostname for IP %s is %s\n", ip, names[0])
+		} else {
+			fmt.Printf("No hostname found for IP %s\n", ip)
+		}
 	}
 }
