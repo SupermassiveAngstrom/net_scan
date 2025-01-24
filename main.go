@@ -64,29 +64,34 @@ func getUserIP() (string, error) {
 			return ipNet.IP.String(), nil
 		}
 	}
+	// Returns an error indicating no valid IP address was found
 	return "", fmt.Errorf("no valid IP address found")
 }
 
+// getNetworkStartIP takes a user-provided IP address and returns the start IP of the network
 func getNetworkStartIP(userIP string) string {
 	ipParts := strings.Split(userIP, ".")
-	ipParts[3] = "1"
+	ipParts[3] = "1" // Set the last octet to 1
 	return strings.Join(ipParts, ".")
 }
 
+// ipToInt converts an IP address to a 32-bit integer
 func ipToInt(ip net.IP) uint32 {
-	ip = ip.To4()
+	ip = ip.To4() // Ensure the IP is in IPv4 format
 	return uint32(ip[0])<<24 | uint32(ip[1])<<16 | uint32(ip[2])<<8 | uint32(ip[3])
 }
 
+// intToIP converts a 32-bit integer back to an IP address
 func intToIP(ipInt uint32) string {
 	return fmt.Sprintf("%d.%d.%d.%d", byte(ipInt>>24), byte(ipInt>>16&0xFF), byte(ipInt>>8&0xFF), byte(ipInt&0xFF))
 }
 
+// pingIP pings the given IP address and prints if the IP is up
 func pingIP(ip string) {
-	cmd := exec.Command("ping", "-c", "1", "-W", "1", ip)
+	cmd := exec.Command("ping", "-c", "1", "-W", "1", ip) // Ping the IP with a timeout of 1 second
 
 	err := cmd.Run()
 	if err == nil {
-		fmt.Printf("IP %s is up\n", ip)
+		fmt.Printf("IP %s is up\n", ip) // Print if the IP is reachable
 	}
 }
